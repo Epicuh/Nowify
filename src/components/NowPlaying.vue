@@ -130,29 +130,23 @@ export default {
       }, 2500)
     },
 
-    setAppColours() {
-      if (!this.colourPalette?.background) return
+setAppColours() {
+  const baseHex = this.colourPalette?.background || '#00ff00' // obvious fallback
+  const textHex = this.colourPalette?.text || '#ffffff'
 
-      const baseHex = this.colourPalette.background
+  const gradient = `linear-gradient(
+    180deg,
+    #ff00ff 0%,
+    ${baseHex} 30%,
+    #000000 100%
+  )`
 
-      // AGGRESSIVE TEST GRADIENT
-      const gradient = `linear-gradient(
-        180deg,
-        #ffffff 0%,
-        ${baseHex} 30%,
-        #000000 100%
-      )`
+  document.documentElement.style.setProperty('--color-text-primary', textHex)
+  document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
 
-      document.documentElement.style.setProperty(
-        '--color-text-primary',
-        this.colourPalette.text
-      )
-
-      document.documentElement.style.setProperty(
-        '--colour-background-now-playing',
-        gradient
-      )
-    },
+  // Debug so you can SEE what it picked in DevTools Console
+  console.log('[Nowify] palette:', this.colourPalette, 'baseHex:', baseHex)
+},
 
     handleNowPlaying() {
       if (
