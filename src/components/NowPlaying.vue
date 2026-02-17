@@ -134,12 +134,32 @@ setAppColours() {
   const baseHex = this.colourPalette?.background || '#00ff00' // obvious fallback
   const textHex = this.colourPalette?.text || '#ffffff'
 
-  const gradient = `linear-gradient(
-    180deg,
-    #ff00ff 0%,
-    ${baseHex} 30%,
-    #000000 100%
-  )`
+const lighten = (hex, amt = 0.18) => {
+  const num = parseInt(hex.slice(1), 16)
+  const r = (num >> 16) + Math.round((255 - (num >> 16)) * amt)
+  const g = ((num >> 8) & 0x00ff) + Math.round((255 - ((num >> 8) & 0x00ff)) * amt)
+  const b = (num & 0x0000ff) + Math.round((255 - (num & 0x0000ff)) * amt)
+  return `#${(0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+}
+
+const darken = (hex, amt = 0.35) => {
+  const num = parseInt(hex.slice(1), 16)
+  const r = Math.round((num >> 16) * (1 - amt))
+  const g = Math.round(((num >> 8) & 0x00ff) * (1 - amt))
+  const b = Math.round((num & 0x0000ff) * (1 - amt))
+  return `#${(0x1000000 + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+}
+
+const top = lighten(baseHex, 0.15)
+const bottom = darken(baseHex, 0.45)
+
+const gradient = `linear-gradient(
+  180deg,
+  ${top} 0%,
+  ${baseHex} 75%,
+  ${bottom} 100%
+)`
+
 
   document.documentElement.style.setProperty('--color-text-primary', textHex)
   document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
