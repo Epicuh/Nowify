@@ -161,9 +161,10 @@ export default {
 
     setAppColours() {
       const baseHex =
-        const textHex = '#ffffff'
+        (this.colourPalette && this.colourPalette.background) || '#402830'
+      const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
 
-      const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#ffffff'
+      const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
       const top = lighten(safeBase, 0.12)
 
       // subtle Spotify-ish gradient, with the darker part starting higher up
@@ -175,7 +176,7 @@ export default {
         rgba(0, 0, 0, 0.95) 100%
       )`
 
-      document.documentElement.style.setProperty('--color-text-primary', textHex)
+      //document.documentElement.style.setProperty('--color-text-primary', textHex)
       document.documentElement.style.setProperty(
         '--colour-background-now-playing',
         gradient
