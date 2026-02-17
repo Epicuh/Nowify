@@ -137,8 +137,8 @@ setAppColours() {
   const gradient = `linear-gradient(
   180deg,
   ${top} 0%,
-  ${baseHex} 70%,
-  rgba(0,0,0,0.85) 100%
+  ${baseHex} 60%,
+  rgba(0,0,0,0.85) 90%
 )`
 
 
