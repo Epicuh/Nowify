@@ -18,7 +18,7 @@
       </div>
     </div>
     <div v-else class="now-playing" :class="getNowPlayingClass()">
-      <h1 class="now-playing__idle-heading">No music</h1>
+      <h1 class="now-playing__idle-heading">No music playing</h1>
     </div>
   </div>
 </template>
