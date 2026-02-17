@@ -159,29 +159,50 @@ export default {
       }, 2500)
     },
 
-    setAppColours() {
-      const baseHex =
-        (this.colourPalette && this.colourPalette.background) || '#402830'
-      const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
+setAppColours() {
+  const baseHex =
+    (this.colourPalette && this.colourPalette.background) || '#402830'
 
-      const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
-      const top = lighten(safeBase, 0.12)
+  const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex)
+    ? baseHex
+    : '#402830'
 
-      // subtle Spotify-ish gradient, with the darker part starting higher up
-      const gradient = `linear-gradient(
-        180deg,
-        ${top} 0%,
-        ${safeBase} 60%,
-        rgba(0, 0, 0, 0.85) 90%,
-        rgba(0, 0, 0, 0.95) 100%
-      )`
+  // lighten slightly for top
+  const lighten = (hex, amt = 0.12) => {
+    const num = parseInt(hex.slice(1), 16)
+    const r = Math.min(255, Math.round(((num >> 16) & 255) + (255 - ((num >> 16) & 255)) * amt))
+    const g = Math.min(255, Math.round(((num >> 8) & 255) + (255 - ((num >> 8) & 255)) * amt))
+    const b = Math.min(255, Math.round((num & 255) + (255 - (num & 255)) * amt))
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+  }
 
-      document.documentElement.style.setProperty('--color-text-primary', textHex)
-      document.documentElement.style.setProperty(
-        '--colour-background-now-playing',
-        gradient
-      )
-    },
+  // darken but NOT black
+  const darken = (hex, amt = 0.35) => {
+    const num = parseInt(hex.slice(1), 16)
+    const r = Math.round(((num >> 16) & 255) * (1 - amt))
+    const g = Math.round(((num >> 8) & 255) * (1 - amt))
+    const b = Math.round((num & 255) * (1 - amt))
+    return `#${((1 << 24) + (r << 16) + (g << 8) + b).toString(16).slice(1)}`
+  }
+
+  const top = lighten(safeBase, 0.12)
+  const bottom = darken(safeBase, 0.35) // darker but still color-based
+
+  const gradient = `linear-gradient(
+    180deg,
+    ${top} 0%,
+    ${safeBase} 65%,
+    ${bottom} 100%
+  )`
+
+  // force text to stay white
+  document.documentElement.style.setProperty('--color-text-primary', '#ffffff')
+  document.documentElement.style.setProperty(
+    '--colour-background-now-playing',
+    gradient
+  )
+},
+
 
     handleNowPlaying() {
       if (
