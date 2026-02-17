@@ -161,7 +161,7 @@ export default {
 
     setAppColours() {
       const baseHex =
-        (this.colourPalette && this.colourPalette.background) || '#402830'
+        (this.colourPalette && this.colourPalette.background) || '#ffffff'
         const textHex = '#ffffff'
 
       const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
