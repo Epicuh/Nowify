@@ -5,6 +5,15 @@
  *
  */
 .now-playing {
+
+    color: var(--color-text-primary);
+
+  &__track,
+  &__artists,
+  &__idle-heading {
+    color: var(--color-text-primary);
+  }
+  
   background: var(--colour-background-now-playing);
   background-color: #060606; /* fallback if var is missing */
   display: flex;
