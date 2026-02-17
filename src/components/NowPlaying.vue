@@ -151,21 +151,7 @@ setAppColours() {
   console.log('[Nowify] picked swatch:', this.colourPalette, 'gradient:', gradient)
 }
 
-
-  document.documentElement.style.setProperty('--color-text-primary', textHex)
-  document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
-
-  console.log('[Nowify] baseHex:', baseHex, 'safeBase:', safeBase)
-  console.log('[Nowify] gradient:', gradient)
-}
-
-  document.documentElement.style.setProperty('--color-text-primary', textHex)
-  document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
-
-  // Debug so you can SEE what it picked in DevTools Console
-  console.log('[Nowify] palette:', this.colourPalette, 'baseHex:', baseHex)
-},
-
+// END
     handleNowPlaying() {
       if (
         this.playerResponse.error?.status === 401 ||
