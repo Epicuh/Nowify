@@ -134,7 +134,7 @@ setAppColours() {
   const baseHex = this.colourPalette?.background || '#00ff00' // obvious fallback
   const textHex = this.colourPalette?.text || '#ffffff'
 
-  const gradient = `linear-gradient(
+const gradient = `linear-gradient(
   180deg,
   ${top} 0%,
   ${baseHex} 60%,
