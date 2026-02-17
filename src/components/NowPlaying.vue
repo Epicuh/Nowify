@@ -26,6 +26,53 @@
 <script>
 import * as Vibrant from 'node-vibrant'
 
+// Start
+function clamp(n, min = 0, max = 255) {
+  return Math.min(max, Math.max(min, n));
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '').trim();
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
+  const num = parseInt(full, 16);
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255,
+  };
+}
+
+function rgbToHex({ r, g, b }) {
+  const toHex = v => clamp(v).toString(16).padStart(2, '0');
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+}
+
+function lighten(hex, amt = 0.22) {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHex({
+    r: Math.round(r + (255 - r) * amt),
+    g: Math.round(g + (255 - g) * amt),
+    b: Math.round(b + (255 - b) * amt),
+  });
+}
+
+function darken(hex, amt = 0.45) {
+  const { r, g, b } = hexToRgb(hex);
+  return rgbToHex({
+    r: Math.round(r * (1 - amt)),
+    g: Math.round(g * (1 - amt)),
+    b: Math.round(b * (1 - amt)),
+  });
+}
+
+function spotifyLikeGradient(baseHex) {
+  const top = lighten(baseHex);
+  const bottom = darken(baseHex);
+  return `linear-gradient(180deg, ${top} 0%, ${baseHex} 80%, ${bottom} 100%)`;
+}
+
+// End
+
 import props from '@/utils/props.js'
 
 export default {
