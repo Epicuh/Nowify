@@ -1,15 +1,12 @@
 <template>
   <div id="app">
-    <div
-      v-if="player.playing"
-      class="now-playing"
-      :class="getNowPlayingClass()"
-    >
+    <div v-if="player.playing" class="now-playing" :class="getNowPlayingClass()">
       <div class="now-playing__cover">
         <img
           :src="player.trackAlbum.image"
           :alt="player.trackTitle"
           class="now-playing__image"
+          crossorigin="anonymous"
         />
       </div>
       <div class="now-playing__details">
@@ -27,6 +24,35 @@
 <script>
 import * as Vibrant from 'node-vibrant'
 import props from '@/utils/props.js'
+
+function clamp(n, min = 0, max = 255) {
+  return Math.min(max, Math.max(min, n))
+}
+
+function hexToRgb(hex) {
+  const h = hex.replace('#', '').trim()
+  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h
+  const num = parseInt(full, 16)
+  return {
+    r: (num >> 16) & 255,
+    g: (num >> 8) & 255,
+    b: num & 255
+  }
+}
+
+function rgbToHex({ r, g, b }) {
+  const toHex = v => clamp(v).toString(16).padStart(2, '0')
+  return `#${toHex(r)}${toHex(g)}${toHex(b)}`
+}
+
+function lighten(hex, amt = 0.12) {
+  const { r, g, b } = hexToRgb(hex)
+  return rgbToHex({
+    r: Math.round(r + (255 - r) * amt),
+    g: Math.round(g + (255 - g) * amt),
+    b: Math.round(b + (255 - b) * amt)
+  })
+}
 
 export default {
   name: 'NowPlaying',
@@ -111,6 +137,9 @@ export default {
         .then(palette => {
           this.handleAlbumPalette(palette)
         })
+        .catch(() => {
+          // If palette extraction fails, keep whatever background you already have.
+        })
     },
 
     getEmptyPlayer() {
@@ -130,28 +159,30 @@ export default {
       }, 2500)
     },
 
-setAppColours() {
-  const baseHex = (this.colourPalette && this.colourPalette.background) || '#402830'
-  const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
+    setAppColours() {
+      const baseHex =
+        (this.colourPalette && this.colourPalette.background) || '#402830'
+      const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
 
-  const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
-  const top = lighten(safeBase, 0.12)
+      const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
+      const top = lighten(safeBase, 0.12)
 
-  const gradient = `linear-gradient(
-    180deg,
-    ${top} 0%,
-    ${safeBase} 60%,
-    rgba(0,0,0,0.85) 90%,
-    rgba(0,0,0,0.95) 100%
-  )`
+      // subtle Spotify-ish gradient, with the darker part starting higher up
+      const gradient = `linear-gradient(
+        180deg,
+        ${top} 0%,
+        ${safeBase} 60%,
+        rgba(0, 0, 0, 0.85) 90%,
+        rgba(0, 0, 0, 0.95) 100%
+      )`
 
-  document.documentElement.style.setProperty('--color-text-primary', textHex)
-  document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
+      document.documentElement.style.setProperty('--color-text-primary', textHex)
+      document.documentElement.style.setProperty(
+        '--colour-background-now-playing',
+        gradient
+      )
+    },
 
-  console.log('[Nowify] picked swatch:', this.colourPalette, 'gradient:', gradient)
-},
-
-// END
     handleNowPlaying() {
       if (
         this.playerResponse.error?.status === 401 ||
@@ -172,9 +203,7 @@ setAppColours() {
 
       this.playerData = {
         playing: this.playerResponse.is_playing,
-        trackArtists: this.playerResponse.item.artists.map(
-          artist => artist.name
-        ),
+        trackArtists: this.playerResponse.item.artists.map(artist => artist.name),
         trackTitle: this.playerResponse.item.name,
         trackId: this.playerResponse.item.id,
         trackAlbum: {
@@ -185,17 +214,19 @@ setAppColours() {
     },
 
     handleAlbumPalette(palette) {
-      const albumColours = Object.keys(palette)
-        .filter(key => palette[key])
-        .map(key => ({
-          text: palette[key].getTitleTextColor(),
-          background: palette[key].getHex()
-        }))
+      const preferred =
+        palette.Vibrant ||
+        palette.Muted ||
+        palette.DarkVibrant ||
+        palette.DarkMuted ||
+        Object.values(palette).find(s => s)
 
-      this.swatches = albumColours
+      if (!preferred) return
 
-      this.colourPalette =
-        albumColours[Math.floor(Math.random() * albumColours.length)]
+      this.colourPalette = {
+        text: preferred.getTitleTextColor(),
+        background: preferred.getHex()
+      }
 
       this.$nextTick(() => {
         this.setAppColours()
