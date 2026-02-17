@@ -162,7 +162,7 @@ export default {
     setAppColours() {
       const baseHex =
         (this.colourPalette && this.colourPalette.background) || '#402830'
-      const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
+        const textHex = '#ffffff'
 
       const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
       const top = lighten(safeBase, 0.12)
