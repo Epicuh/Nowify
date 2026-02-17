@@ -176,7 +176,7 @@ export default {
         rgba(0, 0, 0, 0.95) 100%
       )`
 
-      document.documentElement.style.setProperty('--color-text-primary', '#ffffff')
+      document.documentElement.style.setProperty('--color-text-primary', textHex)
       document.documentElement.style.setProperty(
         '--colour-background-now-playing',
         gradient
