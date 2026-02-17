@@ -135,10 +135,10 @@ setAppColours() {
   const textHex = this.colourPalette?.text || '#ffffff'
 
 const gradient = `linear-gradient(
-  180deg,
-  ${top} 0%,
-  ${baseHex} 60%,
-  rgba(0,0,0,0.85) 90%
+180deg,
+${top} 0%,
+${baseHex} 80%,
+rgba(0,0,0,0.85) 100% )
 )`
 
 
