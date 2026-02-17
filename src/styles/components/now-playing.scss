@@ -5,8 +5,8 @@
  *
  */
 .now-playing {
-background: linear-gradient(180deg, #ff00ff 0%, #000000 100%) !important;
-  color: var(--color-text-primary);
+  background: var(--colour-background-now-playing);
+  background-color: #060606; /* fallback if var is missing */
   display: flex;
   flex-flow: column nowrap;
   height: 100%;
