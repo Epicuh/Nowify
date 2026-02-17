@@ -134,12 +134,9 @@ setAppColours() {
   const baseHex = (this.colourPalette && this.colourPalette.background) || '#402830'
   const textHex = (this.colourPalette && this.colourPalette.text) || '#ffffff'
 
-  // minimal hex sanity check: if it’s not "#RRGGBB", use fallback
   const safeBase = /^#[0-9a-fA-F]{6}$/.test(baseHex) ? baseHex : '#402830'
-
   const top = lighten(safeBase, 0.12)
 
-  // darker part 10% higher up: start darkening earlier, but don’t nuke the whole thing
   const gradient = `linear-gradient(
     180deg,
     ${top} 0%,
@@ -147,6 +144,13 @@ setAppColours() {
     rgba(0,0,0,0.85) 90%,
     rgba(0,0,0,0.95) 100%
   )`
+
+  document.documentElement.style.setProperty('--color-text-primary', textHex)
+  document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
+
+  console.log('[Nowify] picked swatch:', this.colourPalette, 'gradient:', gradient)
+}
+
 
   document.documentElement.style.setProperty('--color-text-primary', textHex)
   document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
