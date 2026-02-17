@@ -10,10 +10,6 @@
     ></Component>
   </div>
 </template>
-<div style="position:fixed;bottom:8px;right:8px;z-index:9999;background:#ff00ff;color:#000;padding:6px 10px;font:12px monospace;">
-  BUILD TEST Feb16-1
-</div>
-
 
 <script>
 import Authorise from '@/components/Authorise'
