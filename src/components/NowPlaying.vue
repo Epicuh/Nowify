@@ -149,7 +149,7 @@ setAppColours() {
   document.documentElement.style.setProperty('--colour-background-now-playing', gradient)
 
   console.log('[Nowify] picked swatch:', this.colourPalette, 'gradient:', gradient)
-}
+},
 
 // END
     handleNowPlaying() {
