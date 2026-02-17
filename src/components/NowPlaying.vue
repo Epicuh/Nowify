@@ -17,6 +17,7 @@
         <h2 class="now-playing__artists" v-text="getTrackArtists"></h2>
       </div>
     </div>
+
     <div v-else class="now-playing" :class="getNowPlayingClass()">
       <h1 class="now-playing__idle-heading">No music playing</h1>
     </div>
@@ -25,54 +26,6 @@
 
 <script>
 import * as Vibrant from 'node-vibrant'
-
-// Start
-function clamp(n, min = 0, max = 255) {
-  return Math.min(max, Math.max(min, n));
-}
-
-function hexToRgb(hex) {
-  const h = hex.replace('#', '').trim();
-  const full = h.length === 3 ? h.split('').map(c => c + c).join('') : h;
-  const num = parseInt(full, 16);
-  return {
-    r: (num >> 16) & 255,
-    g: (num >> 8) & 255,
-    b: num & 255,
-  };
-}
-
-function rgbToHex({ r, g, b }) {
-  const toHex = v => clamp(v).toString(16).padStart(2, '0');
-  return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-}
-
-function lighten(hex, amt = 0.22) {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHex({
-    r: Math.round(r + (255 - r) * amt),
-    g: Math.round(g + (255 - g) * amt),
-    b: Math.round(b + (255 - b) * amt),
-  });
-}
-
-function darken(hex, amt = 0.45) {
-  const { r, g, b } = hexToRgb(hex);
-  return rgbToHex({
-    r: Math.round(r * (1 - amt)),
-    g: Math.round(g * (1 - amt)),
-    b: Math.round(b * (1 - amt)),
-  });
-}
-
-function spotifyLikeGradient(baseHex) {
-  const top = lighten(baseHex);
-  const bottom = darken(baseHex);
-  return `linear-gradient(180deg, ${top} 0%, ${baseHex} 80%, ${bottom} 100%)`;
-}
-
-// End
-
 import props from '@/utils/props.js'
 
 export default {
@@ -95,10 +48,6 @@ export default {
   },
 
   computed: {
-    /**
-     * Return a comma-separated list of track artists.
-     * @return {String}
-     */
     getTrackArtists() {
       return this.player.trackArtists.join(', ')
     }
@@ -113,10 +62,6 @@ export default {
   },
 
   methods: {
-    /**
-     * Make the network request to Spotify to
-     * get the current played track.
-     */
     async getNowPlaying() {
       let data = {}
 
@@ -130,25 +75,14 @@ export default {
           }
         )
 
-        /**
-         * Fetch error.
-         */
         if (!response.ok) {
           throw new Error(`An error has occured: ${response.status}`)
         }
 
-        /**
-         * Spotify returns a 204 when no current device session is found.
-         * The connection was successful but there's no content to return.
-         */
         if (response.status === 204) {
           data = this.getEmptyPlayer()
           this.playerData = data
-
-          this.$nextTick(() => {
-            this.$emit('spotifyTrackUpdated', data)
-          })
-
+          this.$emit('spotifyTrackUpdated', data)
           return
         }
 
@@ -156,39 +90,20 @@ export default {
         this.playerResponse = data
       } catch (error) {
         this.handleExpiredToken()
-
         data = this.getEmptyPlayer()
         this.playerData = data
-
-        this.$nextTick(() => {
-          this.$emit('spotifyTrackUpdated', data)
-        })
+        this.$emit('spotifyTrackUpdated', data)
       }
     },
 
-    /**
-     * Get the Now Playing element class.
-     * @return {String}
-     */
     getNowPlayingClass() {
       const playerClass = this.player.playing ? 'active' : 'idle'
       return `now-playing--${playerClass}`
     },
 
-    /**
-     * Get the colour palette from the album cover.
-     */
     getAlbumColours() {
-      /**
-       * No image (rare).
-       */
-      if (!this.player.trackAlbum?.image) {
-        return
-      }
+      if (!this.player.trackAlbum?.image) return
 
-      /**
-       * Run node-vibrant to get colours.
-       */
       Vibrant.from(this.player.trackAlbum.image)
         .quality(1)
         .clearFilters()
@@ -198,10 +113,6 @@ export default {
         })
     },
 
-    /**
-     * Return a formatted empty object for an idle player.
-     * @return {Object}
-     */
     getEmptyPlayer() {
       return {
         playing: false,
@@ -212,9 +123,6 @@ export default {
       }
     },
 
-    /**
-     * Poll Spotify for data.
-     */
     setDataInterval() {
       clearInterval(this.pollPlaying)
       this.pollPlaying = setInterval(() => {
@@ -222,64 +130,48 @@ export default {
       }, 2500)
     },
 
-    /**
-     * Set the stylings of the app based on received colours.
-     */
     setAppColours() {
+      if (!this.colourPalette?.background) return
+
+      const baseHex = this.colourPalette.background
+
+      // AGGRESSIVE TEST GRADIENT
+      const gradient = `linear-gradient(
+        180deg,
+        #ffffff 0%,
+        ${baseHex} 30%,
+        #000000 100%
+      )`
+
       document.documentElement.style.setProperty(
         '--color-text-primary',
         this.colourPalette.text
       )
 
-      //document.documentElement.style.setProperty(
-       /// '--colour-background-now-playing',
-       // this.colourPalette.background
-      //)
-
-      // Start
-      const gradient = spotifyLikeGradient(color)
-
       document.documentElement.style.setProperty(
         '--colour-background-now-playing',
         gradient
       )
-      //End
-      
     },
 
-    /**
-     * Handle newly updated Spotify Tracks.
-     */
     handleNowPlaying() {
       if (
         this.playerResponse.error?.status === 401 ||
         this.playerResponse.error?.status === 400
       ) {
         this.handleExpiredToken()
-
         return
       }
 
-      /**
-       * Player is active, but user has paused.
-       */
       if (this.playerResponse.is_playing === false) {
         this.playerData = this.getEmptyPlayer()
-
         return
       }
 
-      /**
-       * The newly fetched track is the same as our stored
-       * one, we don't want to update the DOM yet.
-       */
       if (this.playerResponse.item?.id === this.playerData.trackId) {
         return
       }
 
-      /**
-       * Store the current active track.
-       */
       this.playerData = {
         playing: this.playerResponse.is_playing,
         trackArtists: this.playerResponse.item.artists.map(
@@ -294,22 +186,13 @@ export default {
       }
     },
 
-    /**
-     * Handle newly stored colour palette:
-     * - Map data to readable format
-     * - Get and store random colour combination.
-     */
     handleAlbumPalette(palette) {
-      let albumColours = Object.keys(palette)
-        .filter(item => {
-          return item === null ? null : item
-        })
-        .map(colour => {
-          return {
-            text: palette[colour].getTitleTextColor(),
-            background: palette[colour].getHex()
-          }
-        })
+      const albumColours = Object.keys(palette)
+        .filter(key => palette[key])
+        .map(key => ({
+          text: palette[key].getTitleTextColor(),
+          background: palette[key].getHex()
+        }))
 
       this.swatches = albumColours
 
@@ -321,37 +204,25 @@ export default {
       })
     },
 
-    /**
-     * Handle an expired access token from Spotify.
-     */
     handleExpiredToken() {
       clearInterval(this.pollPlaying)
       this.$emit('requestRefreshToken')
     }
   },
+
   watch: {
-    /**
-     * Watch the auth object returned from Spotify.
-     */
-    auth: function(oldVal, newVal) {
+    auth(oldVal, newVal) {
       if (newVal.status === false) {
         clearInterval(this.pollPlaying)
       }
     },
 
-    /**
-     * Watch the returned track object.
-     */
-    playerResponse: function() {
+    playerResponse() {
       this.handleNowPlaying()
     },
 
-    /**
-     * Watch our locally stored track data.
-     */
-    playerData: function() {
+    playerData() {
       this.$emit('spotifyTrackUpdated', this.playerData)
-
       this.$nextTick(() => {
         this.getAlbumColours()
       })
