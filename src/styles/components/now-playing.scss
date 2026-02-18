@@ -21,9 +21,6 @@
   padding: var(--spacing-l);
   width: 100%;
 
-  /* Shift everything left by 2cm */
-  transform: translateX(-2cm);
-
   &__cover,
   &__details {
     padding: var(--spacing-m);
@@ -35,6 +32,9 @@
     border-radius: 12px;
     display: block;
     max-width: 400px;
+
+    /* Shift cover 2cm left */
+    margin-left: -2cm;
   }
 
   &__image {
@@ -45,13 +45,15 @@
     max-width: 60vw;
     width: 100%;
 
-    /* Scale album cover to 0.85x */
-    transform: scale(0.85);
-    transform-origin: center;
+    /* Proper scale without layout breaking */
+    width: 85%;
   }
 
   &__details {
     text-align: center;
+
+    /* Shift text 2cm left */
+    margin-left: -2cm;
   }
 
   &__track {
